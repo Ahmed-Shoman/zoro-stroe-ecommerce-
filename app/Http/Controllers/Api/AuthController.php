@@ -12,20 +12,20 @@ use App\Http\Resources\UserResource;
 class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
-    {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+{
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => $request->password,
+    ]);
 
-        $token = $user->createToken('api-token')->plainTextToken;
+    $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'user' => new UserResource($user),
-            'token' => $token,
-        ]);
-    }
+    return response()->json([
+        'user' => new UserResource($user),
+        'token' => $token,
+    ]);
+}
 
     public function login(LoginRequest $request)
     {
@@ -41,9 +41,12 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout()
-    {
-        auth()->user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out']);
-    }
+        public function logout()
+        {
+            request()->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'message' => 'Logged out successfully'
+            ]);
+        }
 }
