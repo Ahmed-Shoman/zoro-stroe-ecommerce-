@@ -31,3 +31,9 @@ use App\Http\Controllers\Api\CategoryController;
 
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::post('/categories', [CategoryController::class, 'store']);
+
+
+use App\Http\Controllers\Api\BrandController;
+
+Route::get('/brands', [BrandController::class, 'index']);
+Route::post('/brands', [BrandController::class, 'store']);
