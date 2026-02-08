@@ -23,53 +23,92 @@ class CategoryResource extends Resource
     protected static ?string $navigationLabel = 'Categories';
 
     public static function form(Form $form): Form
-    {
-        return $form->schema([
-            Forms\Components\TextInput::make('name')
-                ->required()
-                ->live(onBlur: true)
-                ->afterStateUpdated(
-                    fn ($state, callable $set) =>
-                        $set('slug', str($state)->slug())
-                ),
+{
+    return $form->schema([
 
-            Forms\Components\TextInput::make('slug')
-                ->required()
-                ->unique(ignoreRecord: true),
+        Forms\Components\Section::make('Category Information')
+            ->schema([
+                Forms\Components\Grid::make(2)
+                    ->schema([
 
-            Forms\Components\Select::make('parent_id')
-                ->label('Parent Category')
-                ->relationship('parent', 'name')
-                ->searchable()
-                ->nullable(),
+                        Forms\Components\TextInput::make('name')
+                            ->required()
+                            ->placeholder('e.g. Laptops')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(
+                                fn ($state, callable $set) =>
+                                    $set('slug', str($state)->slug())
+                            ),
 
-            Forms\Components\TextInput::make('icon')
-                ->placeholder('icon name or svg'),
+                        Forms\Components\TextInput::make('slug')
+                            ->required()
+                            ->helperText('Auto generated from name')
+                            ->unique(ignoreRecord: true),
+                    ]),
 
-            Forms\Components\Toggle::make('is_active')
-                ->default(true),
-        ]);
-    }
+                Forms\Components\Select::make('parent_id')
+                    ->label('Parent Category')
+                    ->relationship('parent', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->placeholder('Main category (optional)')
+                    ->nullable(),
+            ]),
+
+        Forms\Components\Section::make('Appearance')
+            ->schema([
+                Forms\Components\FileUpload::make('icon')
+                    ->label('Category Icon')
+                    ->image()
+                    ->directory('categories/icons')
+                    ->disk('public')
+                    ->imagePreviewHeight('80')
+                    ->maxSize(1024)
+                    ->helperText('SVG / PNG recommended'),
+
+                Forms\Components\Toggle::make('is_active')
+                    ->label('Active')
+                    ->default(true),
+            ]),
+    ]);
+}
 
     public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('name')->searchable(),
-                Tables\Columns\TextColumn::make('parent.name')->label('Parent'),
-                Tables\Columns\IconColumn::make('is_active')->boolean(),
-                Tables\Columns\TextColumn::make('created_at')->date(),
-            ])
-            ->filters([
-                Tables\Filters\TernaryFilter::make('is_active'),
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
-    }
+{
+    return $table
+        ->columns([
+            Tables\Columns\ImageColumn::make('icon')
+                ->disk('public')
+                ->circular()
+                ->label('Icon'),
+
+            Tables\Columns\TextColumn::make('name')
+                ->searchable()
+                ->sortable(),
+
+            Tables\Columns\BadgeColumn::make('parent.name')
+                ->label('Parent')
+                ->color('gray')
+                ->default('Main'),
+
+            Tables\Columns\IconColumn::make('is_active')
+                ->boolean()
+                ->label('Active'),
+
+            Tables\Columns\TextColumn::make('created_at')
+                ->date()
+                ->sortable(),
+        ])
+        ->filters([
+            Tables\Filters\TernaryFilter::make('is_active'),
+        ])
+        ->actions([
+            Tables\Actions\EditAction::make(),
+        ])
+        ->bulkActions([
+            Tables\Actions\DeleteBulkAction::make(),
+        ]);
+}
 
     public static function getPages(): array
     {
