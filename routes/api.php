@@ -52,3 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart/add', [CartController::class, 'add']);
     Route::delete('/cart/remove/{product}', [CartController::class, 'remove']);
 });
+
+use App\Http\Controllers\Api\OrderController;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+});

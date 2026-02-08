@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
+
+
 {
+protected static ?string $navigationIcon = 'heroicon-o-cube';
     public function show(Request $request)
     {
         $cart = Cart::firstOrCreate(

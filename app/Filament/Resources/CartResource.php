@@ -18,6 +18,9 @@ class CartResource extends Resource
     protected static ?string $model = Cart::class;
     protected static ?string $navigationGroup = 'Store Management';
     protected static ?string $navigationLabel = 'Carts';
+    protected static ?string $navigationIcon = 'heroicon-o-cube';
+
+
 
     public static function table(Table $table): Table
     {
