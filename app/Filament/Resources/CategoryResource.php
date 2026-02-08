@@ -47,12 +47,13 @@ class CategoryResource extends Resource
                     ]),
 
                 Forms\Components\Select::make('parent_id')
-                    ->label('Parent Category')
-                    ->relationship('parent', 'name')
-                    ->searchable()
-                    ->preload()
-                    ->placeholder('Main category (optional)')
-                    ->nullable(),
+    ->label('Parent Category')
+    ->options(
+        \App\Models\Category::whereNull('parent_id')->pluck('name', 'id')
+    )
+    ->searchable()
+    ->nullable()
+    ->helperText('Leave empty to make this a main category'),
             ]),
 
         Forms\Components\Section::make('Appearance')
