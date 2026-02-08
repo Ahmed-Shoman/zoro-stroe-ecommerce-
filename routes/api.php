@@ -43,3 +43,12 @@ use App\Http\Controllers\Api\ProductController;
 
 Route::get('/products', [ProductController::class, 'index']);
 Route::post('/products', [ProductController::class, 'store']);
+
+
+use App\Http\Controllers\Api\CartController;
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/cart', [CartController::class, 'show']);
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::delete('/cart/remove/{product}', [CartController::class, 'remove']);
+});

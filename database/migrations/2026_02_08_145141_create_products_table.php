@@ -7,32 +7,29 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
+       Schema::create('products', function (Blueprint $table) {
+    $table->id();
 
-            $table->foreignId('category_id')
-                ->constrained()
-                ->cascadeOnDelete();
+    $table->string('sku')->unique();
+    $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
 
-            $table->foreignId('brand_id')
-                ->constrained()
-                ->cascadeOnDelete();
+    $table->string('name');
+    $table->string('slug')->unique();
+    $table->text('description')->nullable();
 
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
+    $table->decimal('price', 10, 2);
+    $table->decimal('sale_price', 10, 2)->nullable();
 
-            $table->decimal('price', 10, 2);
-            $table->decimal('sale_price', 10, 2)->nullable();
+    $table->integer('quantity')->default(0);
+    $table->boolean('track_quantity')->default(true);
+    $table->boolean('allow_backorder')->default(false);
 
-            $table->integer('stock')->default(0);
+    $table->boolean('is_new')->default(false);
+    $table->boolean('is_bestseller')->default(false);
+    $table->boolean('is_active')->default(true);
 
-            $table->boolean('is_new')->default(false);
-            $table->boolean('is_bestseller')->default(false);
-            $table->boolean('is_active')->default(true);
-
-            $table->timestamps();
-        });
+    $table->timestamps();
+});
     }
 
     public function down(): void
