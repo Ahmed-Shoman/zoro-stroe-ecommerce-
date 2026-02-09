@@ -20,35 +20,63 @@ class OrderController extends Controller
             ->firstOrFail();
 
         if ($cart->items->isEmpty()) {
-            return response()->json(['message' => 'Cart is empty'], 422);
+            return response()->json([
+                'message' => 'Cart is empty',
+            ], 422);
         }
 
-        DB::transaction(function () use ($cart, $user) {
+        try {
+            DB::transaction(function () use ($cart, $user) {
 
-            $subtotal = $cart->items->sum(
-                fn ($item) => $item->price * $item->quantity
-            );
+                $subtotal = $cart->items->sum(
+                    fn ($item) => $item->price * $item->quantity
+                );
 
-            $order = Order::create([
-                'user_id' => $user->id,
-                'order_number' => 'ORD-' . now()->timestamp,
-                'subtotal' => $subtotal,
-                'total' => $subtotal,
-                'status' => 'pending',
-            ]);
-
-            foreach ($cart->items as $item) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'price' => $item->price,
+                // create order
+                $order = Order::create([
+                    'user_id'      => $user->id,
+                    'order_number' => 'ORD-' . now()->timestamp,
+                    'subtotal'     => $subtotal,
+                    'total'        => $subtotal,
+                    'status'       => 'pending',
                 ]);
-            }
 
-            $cart->items()->delete();
-        });
+                foreach ($cart->items as $item) {
+                    $product = $item->product;
 
-        return response()->json(['message' => 'Order created']);
+                    if ($product->track_quantity) {
+                        if (
+                            $product->quantity < $item->quantity &&
+                            ! $product->allow_backorder
+                        ) {
+                            throw new \Exception(
+                                "Product {$product->name} is out of stock"
+                            );
+                        }
+
+                        $product->decrement('quantity', $item->quantity);
+                    }
+
+                    // create order item (snapshot)
+                    OrderItem::create([
+                        'order_id'   => $order->id,
+                        'product_id' => $product->id,
+                        'quantity'   => $item->quantity,
+                        'price'      => $item->price,
+                    ]);
+                }
+
+                $cart->items()->delete();
+            });
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Order created successfully',
+        ]);
     }
 }
