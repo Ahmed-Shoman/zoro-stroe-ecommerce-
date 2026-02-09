@@ -12,6 +12,7 @@ return new class extends Migration {
 
     $table->string('sku')->unique();
     $table->foreignId('brand_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('user_id')->constrained()->cascadeOnDelete();
 
     $table->string('name');
     $table->string('slug')->unique();

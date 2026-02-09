@@ -38,4 +38,10 @@ class Product extends Model
             'category_id'
         );
     }
+
+public function user(): BelongsTo
+{
+    return $this->belongsTo(User::class);
+}
+
 }
